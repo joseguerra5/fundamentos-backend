@@ -1,7 +1,7 @@
 import http from "node:http" 
 import { json } from "../streams/middlewares/json.js"
-import { Database } from "./database.js"
 import { routes } from "./routes.js"
+import { extractQyeryParams } from "./utils/extract-query-params.js"
 
 //Query Parameteres:  URL Stateful(fica armazenado na URL, informações não sensíveis - Filtros, paginação, não obrigatórios)
 //Route Parameter: Indentificação de recursos user/1
@@ -24,7 +24,12 @@ const server = http.createServer(async (req, res) => {
   if (route) {
     const routeParams = req.url.match(route.path)
 
-    console.log(routeParams)
+    const {query, ...params} = routeParams.groups
+
+    req.params = params
+    req.query = query ? extractQyeryParams(query) : {}
+    
+
     return route.handler(req, res)
   }
 
